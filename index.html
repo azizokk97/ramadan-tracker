@@ -23,6 +23,7 @@
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
+            /* Глобальный запрет на выделение, КРОМЕ картинок и инпутов */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -30,6 +31,14 @@
         input, textarea {
             -webkit-user-select: text !important;
             user-select: text !important;
+        }
+
+        /* РАЗРЕШАЕМ взаимодействие с картинками для сохранения */
+        img {
+            pointer-events: auto !important;
+            -webkit-user-select: none; /* Чтобы не выделялась как текст */
+            user-select: none;
+            -webkit-touch-callout: default !important; /* Разрешаем меню сохранения iOS */
         }
 
         body {
@@ -174,12 +183,14 @@
 
         /* КАРТОЧКА ШАРИНГА */
         .share-card-container {
-            width: 100%; padding-bottom: 125%; /* Чуть выше */
+            width: 100%; padding-bottom: 125%; 
             position: relative;
             background: linear-gradient(135deg, #1a2a40 0%, #000000 100%);
             border-radius: 24px; border: 1px solid #333; overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             margin-bottom: 20px;
+            /* Важно: исходный элемент должен быть видим для рендера */
+            display: block; 
         }
         .share-content {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -208,13 +219,23 @@
             font-family: 'Manrope', sans-serif; cursor: pointer;
         }
         
+        /* КОНТЕЙНЕР ДЛЯ РЕЗУЛЬТАТА */
         #generatedImageContainer {
             width: 100%; border-radius: 12px; overflow: hidden;
-            border: 1px solid #333; margin-bottom: 20px; display: none;
+            border: 1px solid #333; margin-bottom: 20px; 
+            display: none; /* Скрыт по умолчанию */
+            position: relative;
+            z-index: 999; /* Чтобы быть поверх всего */
         }
         #generatedImageContainer img {
             width: 100%; display: block;
-            pointer-events: auto !important; -webkit-user-select: none; -webkit-touch-callout: default !important;
+        }
+        /* Класс для принудительного разрешения сохранения */
+        .allow-save {
+            pointer-events: auto !important;
+            -webkit-user-select: none !important;
+            -webkit-touch-callout: default !important;
+            user-select: none !important;
         }
 
         /* КАЛЕНДАРЬ И ОТЧЕТЫ */
@@ -582,8 +603,22 @@
     function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged(); }
     window.closeModal = function(id){ document.getElementById(id).classList.remove('show'); }
 
-    // === ЛОГИКА SHARE ===
+    // === ЛОГИКА SHARE (СБРОС ПРИ КАЖДОМ ОТКРЫТИИ) ===
     document.getElementById('btnShare').addEventListener('click', () => {
+        // СБРОС СОСТОЯНИЯ: Скрываем старую картинку, показываем HTML макет
+        const renderBlock = document.getElementById('shareCardToRender');
+        const imgBlock = document.getElementById('generatedImageContainer');
+        const btn = document.getElementById('btnGenImage');
+        const hint = document.getElementById('shareHint');
+        
+        renderBlock.style.display = 'block'; // Важно: показать исходник
+        imgBlock.style.display = 'none';     // Скрыть прошлый скриншот
+        imgBlock.innerHTML = '';             // Очистить
+        btn.innerText = "Создать картинку";
+        hint.innerText = "Нажми кнопку для создания фото";
+        hint.style.color = "#666";
+
+        // Данные
         const d = fullHistory[activeDayNum] || {};
         const rating = d.rating || 0;
         
@@ -611,13 +646,6 @@
         else if(rating >= 4) aiMsg = "💪 Хорошая работа. Чуть-чуть поднажать — и будет идеально.";
         else if(rating > 0 && rating < 3) aiMsg = "Не останавливайся. Завтра будет лучше.";
         document.getElementById('shareAiText').innerText = aiMsg;
-        
-        // Сброс интерфейса
-        document.getElementById('shareCardToRender').style.display = 'block';
-        document.getElementById('generatedImageContainer').style.display = 'none';
-        document.getElementById('generatedImageContainer').innerHTML = '';
-        document.getElementById('btnGenImage').innerText = "Создать картинку";
-        document.getElementById('shareHint').innerText = "Нажми кнопку для создания фото";
 
         document.getElementById('modalShare').classList.add('show');
     });
@@ -636,6 +664,9 @@
 
         btn.innerText = "Генерация...";
         
+        // Важный хак: прокрутить элемент в область видимости перед рендером
+        element.scrollIntoView();
+
         html2canvas(element, { 
             backgroundColor: null,
             scale: 2, 
@@ -646,6 +677,7 @@
                 const imgData = canvas.toDataURL("image/png");
                 const img = document.createElement('img');
                 img.src = imgData;
+                img.className = "allow-save"; // Добавляем класс для разрешений
                 
                 const cont = document.getElementById('generatedImageContainer');
                 cont.innerHTML = '';
@@ -658,12 +690,12 @@
                 hint.innerText = "Зажми фото пальцем, чтобы сохранить его.";
                 haptic();
             } catch (e) {
-                alert("Ошибка сохранения картинки. Сделайте скриншот экрана.");
+                alert("Ошибка: " + e.message);
                 btn.innerText = "Ошибка";
             }
         }).catch(err => {
             console.error(err);
-            alert("Не удалось создать картинку. Попробуйте сделать скриншот.");
+            alert("Не удалось. Попробуй обновить страницу.");
             btn.innerText = "Попробовать снова";
         });
     }
