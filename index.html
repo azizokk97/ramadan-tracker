@@ -37,23 +37,26 @@
 
         input, textarea { -webkit-user-select: text !important; user-select: text !important; }
 
-        /* ФОН */
+        /* --- ФОН (ЗВЕЗДЫ) --- */
         #star-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #090e16 0%, #000000 100%);
             z-index: 0; pointer-events: none; overflow: hidden;
         }
         
-        .star-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; animation: moveStars 100s linear infinite; }
+        /* Общие стили звезд */
+        .star-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; animation: moveStars 100s linear infinite; pointer-events: none;}
         .star-layer:nth-child(2) { animation-duration: 150s; opacity: 0.6; }
+        
+        /* Генерация звезд через box-shadow */
         .stars-1 {
             width: 2px; height: 2px; background: transparent;
-            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 90vw 10vh #fff, 50vw 50vh #fff, 15vw 90vh #fff;
+            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 90vw 10vh #fff, 50vw 50vh #fff, 15vw 90vh #fff, 60vw 30vh #fff, 40vw 70vh #fff;
             filter: drop-shadow(0 0 2px white);
         }
         .stars-2 {
             width: 3px; height: 3px; background: transparent;
-            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 75vw 25vh #fff, 10vw 60vh #fff;
+            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 75vw 25vh #fff, 10vw 60vh #fff, 85vw 40vh #fff;
             filter: drop-shadow(0 0 4px white);
         }
         @keyframes moveStars { from { transform: translateY(0); } to { transform: translateY(-100px); } }
@@ -153,25 +156,23 @@
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: #666; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 202; }
         .modal-content { flex: 1; overflow-y: auto; padding: 20px; color: white; position: relative; z-index: 201; }
 
-        /* --- ЛОГИКА ШАРИНГА --- */
+        /* --- ЛОГИКА ШАРИНГА (ОБНОВЛЕННАЯ) --- */
         .share-wrapper { position: relative; width: 100%; margin-bottom: 20px; min-height: 350px; }
 
         /* Оригинальная карточка (HTML) */
         .share-card-container {
             width: 100%; 
-            /* ДЕЛАЕМ КВАДРАТ (1:1) ЧТОБЫ УБРАТЬ ПУСТОТУ СВЕРХУ */
-            padding-bottom: 100%; 
+            padding-bottom: 100%; /* Квадрат 1:1 */
             position: relative;
-            background: linear-gradient(135deg, #1a2a40 0%, #000000 100%);
+            /* Градиент + Звезды (добавим звезды внутрь) */
+            background: radial-gradient(circle at 50% -10%, #1a2a40 0%, #000000 70%);
             border-radius: 24px; border: 1px solid #333; overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             display: block; 
         }
         
         /* Класс скрытия */
-        .visually-hidden {
-            opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0;
-        }
+        .visually-hidden { opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; }
 
         /* Контейнер для готовой картинки */
         #generatedImageContainer {
@@ -183,7 +184,6 @@
         
         #generatedImageContainer img {
             width: 100%; height: 100%; object-fit: cover;
-            /* Разрешаем всё для iOS */
             pointer-events: auto !important; 
             -webkit-user-select: auto !important; user-select: auto !important;
             -webkit-touch-callout: default !important;
@@ -192,18 +192,48 @@
         .share-content {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 10px; /* Уменьшил паддинг */
+            padding: 15px; 
             text-align: center;
+            z-index: 10; /* Чтобы быть над звездами */
         }
-        .share-date { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 15px; }
-        .share-circle-wrap { width: 120px; height: 120px; position: relative; margin-bottom: 15px; }
-        .share-day-num { font-size: 48px; font-weight: 800; color: #fff; }
-        .share-ai-text { font-size: 15px; line-height: 1.4; color: #eee; font-style: italic; max-width: 90%; margin-bottom: 20px; }
         
-        .share-branding { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; }
-        .share-branding-text { font-size: 11px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-        .share-branding-bot { font-size: 13px; color: var(--accent); font-weight: 800; margin-bottom: 6px; }
-        .share-branding-sub { font-size: 10px; color: #666; font-weight: 600; }
+        /* Стили внутри карточки (Исправленные отступы) */
+        .share-date { 
+            font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #888; 
+            margin-bottom: 10px; /* Было 15 */
+        }
+        .share-circle-wrap { 
+            width: 130px; height: 130px; /* Чуть больше */
+            position: relative; 
+            margin-bottom: 25px; /* Больше отступа вниз */
+        }
+        .share-day-num { font-size: 52px; font-weight: 800; color: #fff; }
+        
+        .share-ai-text { 
+            font-size: 16px; line-height: 1.4; color: #eee; font-style: italic; max-width: 90%; 
+            margin-bottom: 25px; /* Больше отступа от текста до звезд */
+        }
+        
+        /* Звезды оценки внутри карточки */
+        #shareStars { margin-bottom: 25px; }
+
+        /* Брендинг (ПОПРАВЛЕНО) */
+        .share-branding { 
+            position: absolute; bottom: 15px; left: 0; width: 100%; text-align: center; 
+            z-index: 20;
+        }
+        .share-branding-text { 
+            font-size: 10px; /* Меньше */
+            color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; 
+            margin-bottom: 2px; 
+        }
+        .share-branding-bot { 
+            font-size: 12px; /* Чуть меньше */
+            color: var(--accent); font-weight: 800; margin-bottom: 4px; 
+        }
+        .share-branding-sub { 
+            font-size: 10px; color: #666; font-weight: 600; 
+        }
         
         .btn-send-image {
             width: 100%; padding: 16px; background: var(--accent); color: black; font-weight: 800; 
@@ -389,6 +419,9 @@
         
         <div class="share-wrapper">
             <div class="share-card-container" id="shareCardToRender">
+                <div class="star-layer stars-1"></div>
+                <div class="star-layer stars-2"></div>
+
                 <div class="share-content">
                     <div class="share-date" id="shareDate">...</div>
                     <div class="share-circle-wrap">
@@ -403,6 +436,7 @@
                     </div>
                     <div class="share-ai-text" id="shareAiText">...</div>
                     <div class="stars" id="shareStars"></div>
+                    
                     <div class="share-branding">
                         <div class="share-branding-text">Трекер "Рамадан на максималках"</div>
                         <div class="share-branding-bot">@ramadantracking_bot</div>
@@ -620,10 +654,8 @@
         const imgContainer = document.getElementById('generatedImageContainer');
 
         if (btn.innerText.includes("Готово")) {
-             // Если уже сгенерировано, пробуем еще раз вызвать нативный шар
              const existingImg = imgContainer.querySelector('img');
              if(existingImg && navigator.share) {
-                 // Повторная попытка шаринга
                  fetch(existingImg.src).then(res => res.blob()).then(blob => {
                     const file = new File([blob], "ramadan_report.png", { type: "image/png" });
                     navigator.share({ files: [file] }).catch(()=>{});
@@ -638,26 +670,21 @@
             backgroundColor: null, scale: 2, useCORS: true, allowTaint: true 
         }).then(canvas => {
             const imgData = canvas.toDataURL("image/png");
-            
-            // 1. Создаем Blob для шаринга
             const blob = dataURItoBlob(imgData);
             const file = new File([blob], "ramadan_report.png", { type: "image/png" });
 
-            // 2. Отображаем картинку в интерфейсе (на всякий случай)
             const img = document.createElement('img');
             img.src = imgData;
             imgContainer.innerHTML = '';
             imgContainer.appendChild(img);
             imgContainer.style.display = 'block';
 
-            // 3. СКРЫВАЕМ ОРИГИНАЛЬНЫЙ HTML
             element.classList.add('visually-hidden');
 
             btn.innerText = "Готово";
             hint.innerText = "Меню отправки открыто";
             haptic();
 
-            // 4. Пытаемся вызвать нативное меню "Поделиться" с НОВЫМ ТЕКСТОМ
             if (navigator.share) {
                 navigator.share({
                     files: [file],
@@ -679,7 +706,6 @@
         });
     }
 
-    // Вспомогательная функция для конвертации
     function dataURItoBlob(dataURI) {
         var byteString = atob(dataURI.split(',')[1]);
         var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
