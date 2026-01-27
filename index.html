@@ -23,7 +23,6 @@
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
-            /* Глобальный запрет на выделение текста, кроме input */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -151,9 +150,7 @@
             font-family: 'Manrope', sans-serif; box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); 
             position: relative; z-index: 50; transition: background 0.3s;
         }
-        .btn-finish.saved {
-            background: var(--green); color: white;
-        }
+        .btn-finish.saved { background: var(--green); color: white; }
         .btn-share {
             background: #222; border: 1px solid #333; border-radius: 16px; color: #fff;
             font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -177,7 +174,8 @@
 
         /* КАРТОЧКА ШАРИНГА */
         .share-card-container {
-            width: 100%; padding-bottom: 120%; position: relative;
+            width: 100%; padding-bottom: 125%; /* Чуть выше */
+            position: relative;
             background: linear-gradient(135deg, #1a2a40 0%, #000000 100%);
             border-radius: 24px; border: 1px solid #333; overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
@@ -193,9 +191,16 @@
         .share-day-num { font-size: 48px; font-weight: 800; color: #fff; }
         .share-ai-text { font-size: 15px; line-height: 1.4; color: #eee; font-style: italic; max-width: 90%; margin-bottom: 20px; }
         
+        /* БРЕНДИНГ В КАРТИНКЕ */
         .share-branding { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; }
-        .share-branding-text { font-size: 11px; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .share-branding-sub { font-size: 10px; color: #666; }
+        .share-branding-text { 
+            font-size: 11px; color: #aaa; font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 0.5px; margin-bottom: 2px; 
+        }
+        .share-branding-bot {
+            font-size: 13px; color: var(--accent); font-weight: 800; margin-bottom: 6px;
+        }
+        .share-branding-sub { font-size: 10px; color: #666; font-weight: 600; }
         
         .btn-send-image {
             width: 100%; padding: 16px; background: var(--accent); color: black; font-weight: 800; 
@@ -203,34 +208,30 @@
             font-family: 'Manrope', sans-serif; cursor: pointer;
         }
         
-        /* КОНТЕЙНЕР ДЛЯ ГОТОВОЙ КАРТИНКИ */
         #generatedImageContainer {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #333;
-            margin-bottom: 20px;
-            display: none;
+            width: 100%; border-radius: 12px; overflow: hidden;
+            border: 1px solid #333; margin-bottom: 20px; display: none;
         }
-        
-        /* СТИЛЬ ДЛЯ САМОЙ КАРТИНКИ (Чтобы работало долгое нажатие) */
         #generatedImageContainer img {
-            width: 100%;
-            display: block;
-            pointer-events: auto !important; /* Разрешаем клики */
-            -webkit-user-select: none; /* Запрещаем выделять как текст */
-            -webkit-touch-callout: default !important; /* Разрешаем меню iOS */
+            width: 100%; display: block;
+            pointer-events: auto !important; -webkit-user-select: none; -webkit-touch-callout: default !important;
         }
 
         /* КАЛЕНДАРЬ И ОТЧЕТЫ */
         .city-list { display: flex; flex-direction: column; gap: 10px; }
         .city-item { padding: 15px; background: #222; border-radius: 12px; cursor: pointer; border: 1px solid #333; transition: 0.2s; display: flex; justify-content: space-between; }
         .cal-disclaimer { font-size: 12px; color: #888; text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; line-height: 1.4; }
+        
         .prayer-table-container { overflow-x: auto; margin-bottom: 20px; }
         .prayer-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        .prayer-table th { text-align: left; font-size: 11px; color: #666; text-transform: uppercase; padding: 10px; border-bottom: 1px solid #333; }
+        .prayer-table th { 
+            text-align: left; font-size: 11px; color: #666; text-transform: uppercase; 
+            padding: 10px; border-bottom: 1px solid #333; vertical-align: bottom;
+        }
+        .th-sub { display: block; font-size: 9px; opacity: 0.7; margin-top: 2px; text-transform: none; }
         .prayer-table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid #222; }
         .prayer-table tr.today-row { background: rgba(212, 175, 55, 0.1); }
+        
         .change-city-btn {
             width: 100%; padding: 16px; background: #222; color: #fff;
             border: 1px solid #444; border-radius: 14px;
@@ -422,7 +423,8 @@
                 <div class="stars" id="shareStars"></div>
 
                 <div class="share-branding">
-                    <div class="share-branding-text">Трекер Рамадан на максималках</div>
+                    <div class="share-branding-text">Трекер "Рамадан на максималках"</div>
+                    <div class="share-branding-bot">@ramadantracking_bot</div>
                     <div class="share-branding-sub">от Азиза Аметова</div>
                 </div>
             </div>
@@ -620,14 +622,13 @@
         document.getElementById('modalShare').classList.add('show');
     });
 
-    // === ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ КАРТИНКИ ===
+    // === ГЕНЕРАЦИЯ КАРТИНКИ ===
     window.generateAndSend = function() {
         const btn = document.getElementById('btnGenImage');
         const hint = document.getElementById('shareHint');
         const element = document.getElementById('shareCardToRender');
         
         if (btn.innerText.includes("Готово")) {
-            // Если уже готово, просто подсказываем
             hint.style.color = "#d4af37";
             hint.innerText = "Долгий тап по картинке ⬆️, чтобы сохранить.";
             return;
@@ -635,11 +636,10 @@
 
         btn.innerText = "Генерация...";
         
-        // Используем опции для корректной работы
         html2canvas(element, { 
             backgroundColor: null,
-            scale: 2, // Высокое качество
-            useCORS: true, // Разрешаем внешние ресурсы
+            scale: 2, 
+            useCORS: true, 
             allowTaint: true
         }).then(canvas => {
             try {
@@ -651,9 +651,8 @@
                 cont.innerHTML = '';
                 cont.appendChild(img);
                 
-                // Переключаем отображение
-                element.style.display = 'none'; // Скрываем HTML
-                cont.style.display = 'block';   // Показываем картинку
+                element.style.display = 'none'; 
+                cont.style.display = 'block';   
                 
                 btn.innerText = "Готово (Жми на фото)";
                 hint.innerText = "Зажми фото пальцем, чтобы сохранить его.";
@@ -686,7 +685,7 @@
     window.changeCity=function(){ savedCityId=null; localStorage.removeItem('ramadan_city_id_v14'); renderCitySelector(document.getElementById('calContent')); document.getElementById('calTitle').innerText="📍 Выберите город"; }
     
     function renderCalendar(c,city){
-        let h=`<div class="cal-disclaimer">⚠️ Время указано приблизительно.</div><div class="prayer-table-container"><table class="prayer-table"><thead><tr><th>Д</th><th>Фаджр</th><th>Зухр</th><th>Аср</th><th>Магриб</th><th>Иша</th></tr></thead><tbody>`;
+        let h=`<div class="cal-disclaimer">⚠️ Время указано приблизительно.</div><div class="prayer-table-container"><table class="prayer-table"><thead><tr><th>Д</th><th>Фаджр<br><span class="th-sub">(конец сухура)</span></th><th>Зухр</th><th>Аср</th><th>Магриб<br><span class="th-sub">(время ифтара)</span></th><th>Иша</th></tr></thead><tbody>`;
         for(let i=0; i<30; i++){
             let shift=city.min_shift*i; 
             let fM=30-shift, mM=10+shift, fH=city.fajr_base, mH=city.maghrib_base;
@@ -713,17 +712,13 @@
         document.getElementById('modalStats').classList.add('show');
     });
 
-    // === КНОПКА СОХРАНИТЬ (ИСПРАВЛЕНА ВИЗУАЛИЗАЦИЯ) ===
     document.getElementById('btnFinish').addEventListener('click', function() { 
         saveData(); 
-        
-        // Визуальный эффект успешного сохранения
         const btn = this;
         const originalText = btn.innerText;
         btn.innerText = "СОХРАНЕНО!";
         btn.classList.add('saved');
         
-        // Если это телеграм, не закрываем сразу, чтобы юзер видел успех
         if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         
         setTimeout(() => {
