@@ -166,7 +166,9 @@
         }
         .heatmap-day {
             aspect-ratio: 1/1; background: #222; border-radius: 8px; border: 1px solid #333;
-            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #666;
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 10px; font-weight: 800; color: #666;
+            transition: all 0.3s;
         }
         .heatmap-day.good { background: var(--green); color: #fff; border-color: var(--green); box-shadow: 0 0 10px rgba(39, 174, 96, 0.3); }
         .heatmap-day.medium { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
@@ -277,13 +279,13 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="group-label">Обязательные (50%)</div>
+        <div class="group-label">Обязательные</div>
         <div class="task-item" onclick="toggleTask(this, 'fajr')"><span class="task-text">Фаджр</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'dhuhr')"><span class="task-text">Зухр</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'asr')"><span class="task-text">Аср</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'maghrib')"><span class="task-text">Магриб</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'isha')"><span class="task-text">Иша</span><div class="checkbox"></div></div>
-        <div class="group-label">Дополнительные (12%)</div>
+        <div class="group-label">Дополнительные</div>
         <div class="task-item" onclick="toggleTask(this, 'sunnah')"><span class="task-text">Сунна намазы</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'tarawih')"><span class="task-text">Таравих</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'witr')"><span class="task-text">Витр</span><div class="checkbox"></div></div>
@@ -296,9 +298,9 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'quran_read')"><span class="task-text">Читал Коран (15%)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию (10%)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский (3%)</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'quran_read')"><span class="task-text">Читал Коран</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский</span><div class="checkbox"></div></div>
     </div>
 
     <div class="tracker-section">
@@ -307,8 +309,8 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не злословил (5%)</span><div class="checkbox"></div></div>
-        <div class="group-label">Моя цель (5%)</div>
+        <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не злословил</span><div class="checkbox"></div></div>
+        <div class="group-label">Моя цель</div>
         <div class="custom-row">
             <input type="text" class="custom-input" id="customInput" placeholder="Впиши цель..." oninput="saveCustomText()">
             <div class="task-item" onclick="toggleTask(this, 'custom_goal')" style="border:none; padding:0;"><div class="checkbox"></div></div>
@@ -491,12 +493,13 @@
 
     // ВЕСА ЗАДАЧ (Сумма = 100%)
     const SCORES = {
-        fajr: 10, dhuhr: 10, asr: 10, maghrib: 10, isha: 10, // 50%
-        quran_read: 15, // 15%
+        fasting: 15, // NEW: Пост
+        fajr: 9, dhuhr: 9, asr: 9, maghrib: 9, isha: 9, // 45% (9*5)
+        quran_read: 10, // 10%
         lecture: 10, // 10%
-        no_gossip: 5, custom_goal: 5, // 10%
-        sunnah: 3, tarawih: 3, witr: 3, tahajjud: 3, // 12%
-        arabic: 3 // 3%
+        no_gossip: 4, custom_goal: 4, // 8%
+        sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2, // 8%
+        arabic: 4 // 4%
     };
 
     // НАСТРОЙКА: 27 Января 2026
@@ -538,11 +541,16 @@
     }
 
     function calculateDayScore(dayData) {
-        if (!dayData || !dayData.tasks) return 0;
+        if (!dayData) return 0;
         let score = 0;
-        for (let task in dayData.tasks) {
-            if (dayData.tasks[task] && SCORES[task]) {
-                score += SCORES[task];
+        // Пост: если не установлен false, считаем что держит
+        if (dayData.fasting !== false) score += SCORES.fasting;
+        
+        if (dayData.tasks) {
+            for (let task in dayData.tasks) {
+                if (dayData.tasks[task] && SCORES[task]) {
+                    score += SCORES[task];
+                }
             }
         }
         return score > 100 ? 100 : score;
@@ -556,7 +564,7 @@
         const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true };
         
         // Пост
-        const isFasting = (data.fasting !== false); // default true
+        const isFasting = (data.fasting !== false); 
         document.getElementById('fastingYes').className = isFasting ? 'fasting-option active' : 'fasting-option';
         document.getElementById('fastingNo').className = !isFasting ? 'fasting-option active' : 'fasting-option';
 
@@ -584,7 +592,7 @@
         saveData(); haptic();
     }
 
-    // Обновление прогресс-баров (считаем просто кол-во галочек в секции для визуала)
+    // Обновление прогресс-баров
     function updateSectionProgress(section) {
         const total = section.querySelectorAll('.task-item').length;
         if(total === 0) return; 
@@ -646,7 +654,7 @@
         document.body.classList.remove('no-scroll'); 
     }
 
-    // === ГЕНЕРАЦИЯ ОТЧЕТА (HEATMAP) ===
+    // === ГЕНЕРАЦИЯ ОТЧЕТА (HEATMAP + %) ===
     document.getElementById('btnStats').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         
@@ -656,12 +664,12 @@
 
         for(let i=1; i<=30; i++) {
             const dayData = fullHistory[i];
-            const score = calculateDayScore(dayData);
+            const score = dayData ? calculateDayScore(dayData) : 0;
             
             // Heatmap cell
             const cell = document.createElement('div');
             cell.className = 'heatmap-day';
-            cell.innerText = i;
+            cell.innerText = score + '%'; // Показываем процент
             
             if(score >= 80) cell.classList.add('good');
             else if(score >= 40) cell.classList.add('medium');
