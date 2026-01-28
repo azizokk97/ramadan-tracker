@@ -477,8 +477,8 @@
         { id:15, name: "Санкт-Петербург", fajr_base: 6, maghrib_base: 17, min_shift: 3 }
     ];
 
-    const today = new Date();
-    const ramadanStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+   // НАСТРОЙКА: 27 Января 2026 (месяцы с 0: Янв=0, Фев=1...)
+const ramadanStart = new Date(2026, 0, 27);
     
     function getCurrentDay() {
         const now = new Date();
@@ -774,3 +774,4 @@
 </script>
 </body>
 </html>
+
