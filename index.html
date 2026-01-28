@@ -571,8 +571,45 @@
     let activeDayNum = realDayNum;
     let fullHistory = {};
 
-    function initApp() {
+   function initApp() {
         const key = 'ramadan_v18_final';
+        
+        // --- 1. СБОР ДАННЫХ В GOOGLE ТАБЛИЦУ (БЕСПЛАТНО) ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3eBnxD3pkPXVjKy5VXH6srHmrzXtXcJYFkb4V1NKIFbgMtPKSUp9xcx6ftk8QGvaV/exec";
+        
+        // Проверяем, есть ли данные от Телеграма
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            
+            // Простая защита от дублей: проверяем, отправляли ли мы уже этого юзера сегодня
+            // (чтобы не забивать таблицу, если он заходит 100 раз в день)
+            const lastSent = localStorage.getItem('user_data_sent_v1');
+            
+            if (!lastSent) {
+                // Готовим посылку
+                const dataToSend = {
+                    id: user.id,
+                    username: user.username,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    language_code: user.language_code
+                };
+
+                // Отправляем тихо (no-cors значит мы не ждем ответа, просто кидаем и забываем)
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSend)
+                }).then(() => {
+                    // Запоминаем, что отправили, чтобы не спамить
+                    localStorage.setItem('user_data_sent_v1', 'true');
+                    console.log("Данные улетели в таблицу");
+                }).catch(err => console.error("Ошибка отправки", err));
+            }
+        }
+        // ----------------------------------------------------
+
         try {
             if (tg && tg.CloudStorage) {
                 tg.CloudStorage.getItem(key, (err, val) => {
@@ -1000,5 +1037,6 @@
 </script>
 </body>
 </html>
+
 
 
