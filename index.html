@@ -66,6 +66,10 @@
             cursor: pointer; backdrop-filter: blur(10px); font-family: 'Manrope', sans-serif; transition: 0.2s;
             position: relative; z-index: 20;
         }
+        .btn-add {
+            width: 100%; margin-top: 10px; border: 1px dashed rgba(255,255,255,0.3); color: #aaa;
+            background: transparent; padding: 12px; border-radius: 12px; cursor: pointer;
+        }
         .brand-link {
             display: block; text-align: center; font-size: 12px; color: var(--accent);
             text-decoration: none; font-weight: 600; margin-bottom: 25px; opacity: 0.8; letter-spacing: 0.5px;
@@ -122,7 +126,9 @@
         .task-item.checked .checkbox::after { display: block; }
         
         .custom-input { border: 1px solid #333; background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; font-size: 15px; width: 100%; margin-right: 12px; color: #fff; outline: none; font-family: 'Manrope', sans-serif; position: relative; z-index: 12; }
-        .custom-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+        .custom-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; position: relative;}
+        .remove-goal { position: absolute; right: -25px; top: 15px; color: #555; font-size: 18px; padding: 5px; cursor: pointer; }
+
         .stars { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
         .star { font-size: 32px; color: #333; cursor: pointer; transition: color 0.2s; position: relative; z-index: 20;}
         .star.active { color: var(--accent); text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
@@ -344,7 +350,7 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'quran_read')"><span class="task-text">Читал Коран</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'quran_read')"><span class="task-text">Читал Къур'ан</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский</span><div class="checkbox"></div></div>
     </div>
@@ -355,12 +361,16 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не злословил</span><div class="checkbox"></div></div>
-        <div class="group-label">Моя цель</div>
+        <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не злословил / Не сплетничал</span><div class="checkbox"></div></div>
+        <div class="group-label">Мои цели</div>
+        
         <div class="custom-row">
-            <input type="text" class="custom-input" id="customInput" placeholder="Впиши цель..." oninput="saveCustomText()">
+            <input type="text" class="custom-input" id="customInput" placeholder="Главная цель..." oninput="saveCustomText()">
             <div class="task-item" onclick="toggleTask(this, 'custom_goal')" style="border:none; padding:0;"><div class="checkbox"></div></div>
         </div>
+        
+        <div id="extraGoalsContainer"></div>
+        <button class="btn-mini btn-add" onclick="addCustomGoal()">+ Добавить свою цель</button>
     </div>
 
     <div class="tracker-section">
@@ -406,7 +416,7 @@
         <div class="stat-grid">
             <div class="stat-card"><div class="stat-num" id="statDays">0</div><div class="stat-desc">Дней пройдено</div></div>
             <div class="stat-card"><div class="stat-num" id="statRating">0.0</div><div class="stat-desc">Средняя оценка</div></div>
-            <div class="stat-card"><div class="stat-num" id="statQuran">0</div><div class="stat-desc">Читал Коран (дней)</div></div>
+            <div class="stat-card"><div class="stat-num" id="statQuran">0</div><div class="stat-desc">Читал Къур'ан (дней)</div></div>
             <div class="stat-card"><div class="stat-num" id="statNamaz">0</div><div class="stat-desc">Все намазы (дней)</div></div>
         </div>
         <div class="ai-feedback">
@@ -505,7 +515,7 @@
             <div class="stat-card"><div class="stat-num" id="f_avg">0%</div><div class="stat-desc">Эффективность</div></div>
             <div class="stat-card"><div class="stat-num" id="f_fast">0</div><div class="stat-desc">Пропустил пост</div></div>
             <div class="stat-card"><div class="stat-num" id="f_namaz">0</div><div class="stat-desc">Пропустил намазы</div></div>
-            <div class="stat-card"><div class="stat-num" id="f_quran">0</div><div class="stat-desc">Дней с Кораном</div></div>
+            <div class="stat-card"><div class="stat-num" id="f_quran">0</div><div class="stat-desc">Дней с Къур'аном</div></div>
         </div>
 
         <div class="group-label">Топ мыслей за месяц</div>
@@ -572,7 +582,7 @@
     let fullHistory = {};
 
    function initApp() {
-        const key = 'ramadan_v18_final';
+        const key = 'ramadan_v19_final';
         
         // --- 1. СБОР ДАННЫХ В GOOGLE ТАБЛИЦУ (БЕСПЛАТНО) ---
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3eBnxD3pkPXVjKy5VXH6srHmrzXtXcJYFkb4V1NKIFbgMtPKSUp9xcx6ftk8QGvaV/exec";
@@ -650,7 +660,7 @@
         document.getElementById('prevDay').classList.toggle('disabled', dayNum <= 1);
         document.getElementById('nextDay').classList.toggle('disabled', dayNum >= realDayNum);
         
-        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true };
+        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true, extraGoals: [] };
         
         // Пост
         const isFasting = (data.fasting !== false); 
@@ -666,6 +676,24 @@
         document.getElementById('customInput').value = data.customText || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
+        // Рендер дополнительных целей
+        const extraContainer = document.getElementById('extraGoalsContainer');
+        extraContainer.innerHTML = '';
+        if(data.extraGoals && data.extraGoals.length > 0) {
+            data.extraGoals.forEach((goal, idx) => {
+                const checked = goal.done ? 'checked' : '';
+                const html = `
+                <div class="custom-row">
+                    <input type="text" class="custom-input" placeholder="Твоя цель..." value="${goal.text}" oninput="updateExtraGoalText(${idx}, this.value)">
+                    <div class="task-item ${checked}" onclick="toggleExtraGoal(${idx})" style="border:none; padding:0;">
+                        <div class="checkbox"></div>
+                    </div>
+                    <div class="remove-goal" onclick="removeExtraGoal(${idx})">×</div>
+                </div>`;
+                extraContainer.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
         const r = data.rating || 0;
         document.querySelectorAll('.star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= r));
 
@@ -678,15 +706,53 @@
         ensureDayObj(activeDayNum);
         fullHistory[activeDayNum].fasting = val;
         renderDay(activeDayNum);
-        saveData(); haptic();
+        saveData();
+        
+        // Вибрация: если включили (val=true), то вибрируем 15 раз (вес поста)
+        if(val) hapticBurst(SCORES.fasting);
+        else haptic(); // Обычная вибрация при отключении
     }
+
+    // --- ЛОГИКА ДОП. ЦЕЛЕЙ ---
+    window.addCustomGoal = function() {
+        ensureDayObj(activeDayNum);
+        if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals = [];
+        fullHistory[activeDayNum].extraGoals.push({ text: "", done: false });
+        renderDay(activeDayNum);
+        saveData();
+    }
+    window.removeExtraGoal = function(idx) {
+        ensureDayObj(activeDayNum);
+        fullHistory[activeDayNum].extraGoals.splice(idx, 1);
+        renderDay(activeDayNum);
+        saveData();
+    }
+    window.updateExtraGoalText = function(idx, val) {
+        fullHistory[activeDayNum].extraGoals[idx].text = val;
+        clearTimeout(window.st); window.st = setTimeout(saveData, 500);
+    }
+    window.toggleExtraGoal = function(idx) {
+        ensureDayObj(activeDayNum);
+        const current = fullHistory[activeDayNum].extraGoals[idx].done;
+        fullHistory[activeDayNum].extraGoals[idx].done = !current;
+        renderDay(activeDayNum);
+        saveData(); 
+        
+        // Если включили доп. цель, вибрируем 4 раза (как кастомная цель)
+        if(!current) hapticBurst(4);
+        else haptic();
+    }
+    // -------------------------
 
     // Обновление прогресс-баров
     function updateSectionProgress(section) {
-        const total = section.querySelectorAll('.task-item').length;
-        if(total === 0) return; 
-        const checked = section.querySelectorAll('.task-item.checked').length;
-        const percent = Math.round((checked / total) * 100);
+        const totalItems = section.querySelectorAll('.task-item').length;
+        if(totalItems === 0) return; 
+        const checkedItems = section.querySelectorAll('.task-item.checked').length;
+        
+        // Для доп целей, чтобы они влияли на визуальный процент секции Личность
+        const percent = Math.round((checkedItems / totalItems) * 100);
+        
         const fill = section.querySelector('.progress-bar-fill');
         const text = section.querySelector('.section-percent');
         if(fill && text) {
@@ -714,29 +780,62 @@
     
     window.toggleTask = function(el, id) { 
         el.classList.toggle('checked'); ensureDayObj(activeDayNum); 
-        fullHistory[activeDayNum].tasks[id] = el.classList.contains('checked'); 
+        const isChecked = el.classList.contains('checked');
+        
+        fullHistory[activeDayNum].tasks[id] = isChecked; 
         updateSectionProgress(el.closest('.tracker-section'));
         updateDailyCircle(); 
-        saveData(); haptic(); 
+        saveData(); 
+        
+        // ЛОГИКА ВИБРАЦИИ (1 импульс на каждый процент)
+        if(isChecked) {
+            // Если включили галочку — серия вибраций по количеству очков
+            const points = SCORES[id] || 1;
+            hapticBurst(points);
+        } else {
+            // Если выключили — одна обычная вибрация
+            haptic(); 
+        }
     }
     window.saveCustomText = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].customText = document.getElementById('customInput').value; clearTimeout(window.st); window.st = setTimeout(saveData, 500); }
     window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; clearTimeout(window.st); window.st = setTimeout(saveData, 500); }
     document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
 
-    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:true}; }
+    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:true, extraGoals:[]}; }
     
     function saveData(){
         const val = JSON.stringify(fullHistory);
         const status = document.getElementById('syncStatus');
         status.innerText = "Сохранение...";
-        const key = 'ramadan_v18_final';
+        const key = 'ramadan_v19_final';
         const cb = (e) => {
             if(!e) { status.innerText = "Сохранено"; status.classList.add('active'); setTimeout(() => status.classList.remove('active'), 1000); }
         };
         if(tg && tg.CloudStorage) tg.CloudStorage.setItem(key, val, cb);
         else { localStorage.setItem(key, val); cb(null); }
     }
-    function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged(); }
+    
+    // МИКРО-ВИБРАЦИЯ (ОДИНОЧНАЯ)
+    function haptic(){ 
+        if(tg && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+    }
+
+    // СЕРИЯ ВИБРАЦИЙ (НАПОЛНЕНИЕ)
+    // Вибрирует столько раз, сколько передано в count, с интервалом 40мс
+    function hapticBurst(count) {
+        if (!tg || !tg.HapticFeedback) return;
+        // Ограничиваем на всякий случай, чтобы телефон не сошел с ума
+        if(count > 20) count = 20; 
+        
+        let i = 0;
+        let interval = setInterval(() => {
+            tg.HapticFeedback.impactOccurred('light'); // 'light' самая приятная для серий
+            i++;
+            if (i >= count) clearInterval(interval);
+        }, 40); // 40мс между ударами
+    }
     
     window.closeModal = function(id){ 
         document.getElementById(id).classList.remove('show'); 
@@ -818,12 +917,13 @@
 
         for(let i=1; i<=30; i++) {
             const d = fullHistory[i];
+            const t = (d && d.tasks) ? d.tasks : {};
+
             if(!d) { missedFast++; missedNamaz+=5; continue; }
             
             totalScore += calculateDayScore(d);
             if(d.fasting === false) missedFast++;
             
-            const t = d.tasks || {};
             if(!t.fajr) missedNamaz++;
             if(!t.dhuhr) missedNamaz++;
             if(!t.asr) missedNamaz++;
@@ -947,7 +1047,19 @@
              if(existingImg && navigator.share) {
                  fetch(existingImg.src).then(res => res.blob()).then(blob => {
                     const file = new File([blob], "ramadan_report.png", { type: "image/png" });
-                    navigator.share({ files: [file] }).catch(()=>{});
+                    
+                    // ПРОВЕРЯЕМ, КАКОЙ ТЕКСТ ОТПРАВЛЯТЬ
+                    let shareText = 'Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot';
+                    // Если открыт финальный блок
+                    if (document.getElementById('shareFinalContent').style.display !== 'none') {
+                        shareText = 'Альхамдулиллях, я завершил Рамадан! Мои итоги в трекере @ramadantracking_bot';
+                    }
+
+                    navigator.share({ 
+                        files: [file],
+                        title: 'Отчет Рамадан',
+                        text: shareText
+                    }).catch(()=>{});
                  });
              }
              return;
@@ -970,15 +1082,21 @@
 
             element.classList.add('visually-hidden');
 
-            btn.innerText = "Готово";
+            btn.innerText = "Готово (Отправить)";
             hint.innerText = "Меню отправки открыто";
             haptic();
+
+            // ПРОВЕРЯЕМ, КАКОЙ ТЕКСТ ОТПРАВЛЯТЬ
+            let shareText = 'Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot';
+            if (document.getElementById('shareFinalContent').style.display !== 'none') {
+                shareText = 'Альхамдулиллях, я завершил Рамадан! Мои итоги в трекере @ramadantracking_bot';
+            }
 
             if (navigator.share) {
                 navigator.share({
                     files: [file],
                     title: 'Мой отчет Рамадан',
-                    text: 'Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot'
+                    text: shareText
                 }).then(() => {
                     btn.innerText = "Отправлено!";
                 }).catch((error) => {
